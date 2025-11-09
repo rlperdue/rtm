@@ -4,8 +4,8 @@ Created 2025/11/07
 Last updated 2025/11/07
 """
 
-from rtm_optim import (dmp2msh, 
-                       remove_points, 
+from rtm_optim import (remove_points, 
+                       msh2dmp, 
                        msh2obj, 
                        flatten_mesh, 
                        loc_optim, 
@@ -14,13 +14,13 @@ from rtm_optim import (dmp2msh,
 
 def main():
     print('Upload mesh')
-    mesh_dmp = input('>>> ')
-    
-    print('Converting to msh...')
-    mesh_msh = dmp2msh(mesh_dmp)
+    mesh_msh = input('>>> ')
     
     print('Removing extraneous points...')
     remove_points(mesh_msh)
+    
+    print('Converting to dmp...')
+    mesh_dmp = msh2dmp(mesh_msh)
     
     print('Converting to obj...')
     mesh_obj = msh2obj(mesh_msh)
@@ -44,6 +44,7 @@ def main():
     input('>>> ')
     control_optim(mesh_dmp, regions, nodes_uv, auxgate_nodes)
     
-
+    
+# %%
 if __name__ == '__main__':
     main()
