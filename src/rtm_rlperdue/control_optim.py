@@ -4,7 +4,7 @@ Created 2025/11/09
 Last updated 2025/11/09
 """
 
-from rtm_rlperdue.lims import LimsToolbox
+from lims import LimsToolbox
 import matplotlib.pyplot as plt
 import multiprocessing
 import numpy as np

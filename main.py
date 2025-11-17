@@ -1,7 +1,7 @@
 """
 Russell Perdue
 Created 2025/11/07
-Last updated 2025/11/09
+Last updated 2025/11/13
 """
 
 from pathlib import Path
@@ -33,7 +33,7 @@ class RTMEnv():
             self.menu4()
     
     def menu1(self):
-        print('\nUpload mesh.msh: ')
+        print('\nUpload mesh.msh:')
         mesh_msh = Path(input('>>> '))
         self.remove_points(mesh_msh)
         mesh_dmp = setup.msh2dmp(mesh_msh)
@@ -41,7 +41,7 @@ class RTMEnv():
         self.menu0()
     
     def menu2(self):
-        print('\nUpload mesh.msh: ')
+        print('\nUpload mesh.msh:')
         mesh_msh = Path(input('>>> '))
         self.remove_points(mesh_msh)
         mesh_obj = setup.msh2obj(mesh_msh)
@@ -51,7 +51,19 @@ class RTMEnv():
         self.menu0()
         
     def menu3(self):
-        print('\nmenu3')
+        print('\nUpload mesh.dmp:')
+        mesh_dmp = Path(input('>>> '))
+        print('Upload regions.zon:')
+        regions_zon = Path(input('>>> '))
+        print('k values, comma-separated:')
+        kvalues = input('>>> ').split(',')
+        kvalues = [float(k.strip()) for k in kvalues]
+        print('Results directory:')
+        resfolder = Path(input('>>> '))
+        print('Generating dataset...')
+        #dataset.make_dataset(mesh_dmp, regions_zon, kvalues, resfolder)
+        worker_lb = dataset.make_lb(mesh_dmp, regions_zon, resfolder)
+        dataset.make_dataset(kvalues, worker_lb, resfolder)
         
     def menu4(self):
         print('\nmenu4')
