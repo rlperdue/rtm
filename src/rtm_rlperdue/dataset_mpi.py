@@ -8,8 +8,10 @@ import numpy as np
 import re
 import sys
 
-def dataset_mpi(klist_npy: str):
-    klist = np.load(klist_npy)
+#def dataset_mpi(klist_npy: str):
+def dataset_mpi():
+    #klist = np.load(klist_npy)
+    klist = np.load(r'C:/Users/rperd/OneDrive/Documents/GitHub/rtm/tests/test1/dataset0/out/klist.npy')
     nsims = np.size(klist,0)
     nregions = np.size(klist,1)
     
@@ -31,6 +33,8 @@ def dataset_mpi(klist_npy: str):
                 for j in range(nregions):
                     line = f'LET k({j+1}) = {klist[unsolved,j]}\n'.encode()
                     comm.Send((line,len(line)+2,MPI.CHARACTER), dest=i+1, tag=1)
+                line = f'LET index = {unsolved}\n'.encode()
+                comm.Send((line,len(line)+2,MPI.CHARACTER), dest=i+1, tag=1)
                 line = b'CALL Auto\n'
                 comm.Send((line,len(line)+2,MPI.CHARACTER), dest=i+1, tag=1)
                 process[i] = unsolved + 1
@@ -54,4 +58,5 @@ def dataset_mpi(klist_npy: str):
     
     print('Shutting down master module...')
 
-dataset_mpi(sys.argv[1])
+#dataset_mpi(sys.argv[1])
+dataset_mpi()

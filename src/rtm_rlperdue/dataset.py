@@ -15,12 +15,12 @@ def make_lb(mesh_dmp: Path, regions_zon: Path, resfolder: Path) -> Path:
     nregions = 4
     scaleperm_strs = []
     for i in range(nregions):
-        scaleperm_strs.append(f'SCALEPERM "R{i+1}", k({i+1})')
+        scaleperm_strs.append(f'SCALEPERM "R{i+1}", 10^k({i+1})')
     scaleperm_block = '\n    '.join(scaleperm_strs)
     s = f'''
 WARNINGS 0
 DIM k(4)
-DIM index
+DEFINT index
 PROC Auto
     CHANGEDIR "{mesh_dmp.parent.resolve().as_posix()}"
     SETINTYPE "dmp"
@@ -58,19 +58,32 @@ def make_dataset(kvalues: list[float], worker_lb: Path, resfolder: Path):
     
     cmds = ['@echo off', 
 'call C:/Users/rperd/miniforge3/Scripts/activate.bat', 
-'call cd C:/Users/rperd/OneDrive/Documents/GitHub/rtm/src/rtm_rlperdue/dataset_mpi.py', 
+'call cd C:/Users/rperd/OneDrive/Documents/GitHub/rtm/src/rtm_rlperdue', 
 'call conda activate torch-env', 
-f'call mpiexec -n 1 python dataset_mpi.py {klist_npy} : -n 7 mpilims -x -l{worker_lb}', 
+f'call mpiexec -n 1 python dataset_mpi.py : -n 7 C:/lhome/bin/mpilims -x -l{worker_lb}', 
 'pause']
+    '''
     cmd = ' && '.join(cmds)
     print(cmd)
-    subprocess.run(cmd, shell=True)
-    os.remove(worker_lb)
+    subprocess.run(cmd, shell=True)'''
+    
+    fp = tempfile.NamedTemporaryFile(mode='w+b', suffix='.bat', delete=False)
+    for cmd in cmds:
+        fp.write((cmd+'\n').encode())
+    fp.seek(0)
+    cmds_bat = Path(fp.name)
+    subprocess.run(str(cmds_bat), shell=True)
+    
+    #os.remove(worker_lb)
+    #os.remove(cmds_bat)
+    
+    return cmds_bat
     
     
 # %%
 mesh_dmp = Path('../../tests/test1/bpillar.dmp')
 regions_zon = Path('../../tests/test1/regions.zon')
-resfolder = Path('../../tests/test1/dataset_mpi')
-p = make_lb(mesh_dmp, regions_zon, resfolder)
+resfolder = Path('../../tests/test1/dataset11')
+worker_lb = make_lb(mesh_dmp, regions_zon, resfolder)
+cmds_bat = make_dataset([0,1], worker_lb, resfolder)
 
