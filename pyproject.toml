@@ -2,7 +2,7 @@
 name = "rtm_rlperdue"
 version = "0.1"
 authors = [{name="Russell Perdue", email="rperdue@udel.edu"}]
-description = "A small example package"
+description = "Optimization of auxiliary gate locations and activation times for manufacturing parts with RTM"
 readme = "README.txt"
 requires-python = ">=3.9"
 
