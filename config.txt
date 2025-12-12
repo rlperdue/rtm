@@ -1,0 +1,11 @@
+lims
+C:\lhome\bin\lims.exe
+
+mpilims
+C:\lhome\bin\mpilims.exe
+
+miniforge
+C:\Users\rperd\miniforge3\Scripts\activate.bat
+
+environment
+C:\Users\rperd\miniforge3\envs\torch-env

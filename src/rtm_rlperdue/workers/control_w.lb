@@ -1,0 +1,50 @@
+READ "../mesh/mesh.dmp"
+REGLOAD "../mesh/regions.zon", "*", 0
+
+DEFINT vent, nregions, naux
+
+DEFDBL pressure
+LET pressure = 100000
+
+PROC Fill
+    DEFINT i
+    FOR i=1 TO nregions
+        SCALEPERM "R"+STR(i), k(i)
+    NEXT i
+    SETGATE "Gate", 1, pressure
+        
+    DO WHILE ((SOCURRENTTIME()<taux(1)) AND (SOFILLFACTOR(vent)<0.9))
+        SOLVE
+    LOOP
+    SETGATE aux(1), 1, pressure
+    SETGATE "Gate", 0
+        
+    FOR i=2 TO naux
+        DO WHILE ((SOCURRENTTIME()<taux(i)) AND (SOFILLFACTOR(vent)<0.9))
+            SOLVE
+        LOOP
+        SETGATE aux(i), 1, pressure
+        SETGATE aux(i-1), 0
+    NEXT i
+        
+    DO WHILE (SOFILLFACTOR(vent)<0.9)
+        SOLVE
+    LOOP
+    SETGATE aux(naux), 0
+        
+    PRINT 1 - SONUMBEREMPTY() / SONUMBERNODES()
+    CALL Clear
+ENDPROC
+
+PROC Clear
+    SETTIME 0.0
+    FOR i=1 TO SONUMBERNODES()
+        SETFILLFACTOR i, 0.0
+        SETNODALDATA i, 10, 0.0
+    NEXT i
+    FOR i=1 TO nregions
+        SCALEPERM "R"+STR(i), 1/k(i)
+    NEXT i
+    ERASE i
+    RESETFILLED
+ENDPROC

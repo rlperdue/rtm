@@ -1,0 +1,33 @@
+READ "../mesh/mesh.dmp"
+REGLOAD "../mesh/regions.zon", "*", 0
+
+DEFINT nregions, gate, vent
+
+DEFDBL pressure, bulkperm
+LET pressure = 100000
+LET bulkperm = 1e-10
+
+PROC Fill
+    SETGATE gate, 1, pressure
+    DO WHILE (SOFILLFACTOR(vent)<0.9)
+        SOLVE
+    LOOP
+    SETGATE gate, 0
+    PRINT SOCURRENTTIME()
+    CALL Clear
+ENDPROC
+
+PROC Clear
+    DEFINT i
+    FOR i=1 TO SONUMBERNODES()
+        SETFILLFACTOR i, 0.0
+        SETNODALDATA i, 10, 0.0
+        SETNODALDATA i, 13, 0.0
+    NEXT i
+    FOR i=1 TO nregions
+        SETPERM "R"+STR(i), 0, bulkperm, 0, bulkperm
+    NEXT i
+    ERASE i
+    RESETFILLED
+    SETTIME 0.0
+ENDPROC
