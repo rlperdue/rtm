@@ -179,8 +179,8 @@ def location(dataset_: Path, naux: int, name: str, meshdata, config):
     pos = np.load(dataset_/'../mesh/mesh_flat.npy')
     nnodes = np.size(pos,0)
     
-    max_calls = 3
-    n_initial_points = 1
+    max_calls = 50
+    n_initial_points = 5
     xdata = np.zeros((max_calls,naux*2))
     ydata = np.zeros(max_calls)
     auxdata = []

@@ -17,6 +17,10 @@ dataset_ = Path(sys.argv[1])
 aux = np.array([int(ag) for ag in sys.argv[2].split(',')])
 vents = [int(vent) for vent in sys.argv[3].split(',')]
 
+with open('auxgates.txt','w') as file:
+    for ag in aux:
+        file.write(f'{ag}\n')
+
 klist = np.load(dataset_/'klist.npy')
 sensortime = np.load(dataset_/'sensortimes.npy')
 #maxtimes_main = np.load(dataset_/'maxtimes.npy')
@@ -45,8 +49,8 @@ optimizer = [None] * nworkers
 taux = [-1] * nworkers
 ready = np.ones(nworkers, dtype=int)
 
-max_calls = 10
-n_initial_points = 1
+max_calls = 30
+n_initial_points = 3
 times = -1 * np.ones((nscenarios, max_calls, naux))
 fills = -1 * np.ones((nscenarios, max_calls))
 iters = np.zeros(nscenarios, dtype=int)
