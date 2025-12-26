@@ -3,29 +3,33 @@ REGLOAD "../mesh/regions.zon", "*", 0
 
 DEFINT count, nregions
 
-DEFDBL pressure, bulkperm
+DEFDBL pressure
 LET pressure = 100000
-LET bulkperm = 1e-10
 
 PROC Fill
+    DEFINT i
+    FOR i=1 TO nregions
+        SCALEPERM "R"+STR(i), k(i)
+    NEXT i
     SETGATE "Gate", 1, pressure
     DO WHILE (SONUMBEREMPTY()>0)
         SOLVE
     LOOP
+    SETNODALDATA "Gate", 13, 0.0
     SETOUTTYPE "msh"
     WRITE "res/res" + STR(count) + ".msh"
     CALL Clear
-    PRINT 0
+    PRINT GETNODALDATA(1, 13)
 ENDPROC
 
 PROC Clear
-    DEFINT i
+    SETTIME 0.0
     FOR i=1 TO SONUMBERNODES()
         SETFILLFACTOR i, 0.0
         SETNODALDATA i, 10, 0.0
     NEXT i
     FOR i=1 TO nregions
-        SETPERM "R"+STR(i), 0, bulkperm, 0, bulkperm
+        SCALEPERM "R"+STR(i), 1/k(i)
     NEXT i
     ERASE i
     RESETFILLED

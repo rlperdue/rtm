@@ -49,8 +49,8 @@ optimizer = [None] * nworkers
 taux = [-1] * nworkers
 ready = np.ones(nworkers, dtype=int)
 
-max_calls = 30
-n_initial_points = 3
+max_calls = 50
+n_initial_points = round(max_calls/3)
 times = -1 * np.ones((nscenarios, max_calls, naux))
 fills = -1 * np.ones((nscenarios, max_calls))
 iters = np.zeros(nscenarios, dtype=int)
@@ -62,15 +62,18 @@ while nsolved < nscenarios:
                 process[i] = nstarted
                 nstarted += 1
                 #bounds = (sensortime[process[i]], maxtime[process[i]])
-                bounds = (0, maxtime[process[i]])
+                bounds = (0.0, maxtime[process[i]])
                 optimizer[i] = Optimizer(
                     [bounds for _ in range(naux)],
                     base_estimator=GaussianProcessRegressor(), 
                     n_initial_points=n_initial_points, 
-                    initial_point_generator='random',  
+                    initial_point_generator='halton',  
                     )
             ready[i] = 0
-            taux[i] = np.array(optimizer[i].ask())
+            if iters[process[i]] == 0:
+                taux[i] = maxtime[process[i]] * np.ones(naux)
+            else:
+                taux[i] = np.array(optimizer[i].ask())
             taux_sort = np.sort(taux[i])
             taux_argsort = np.argsort(taux[i])
             aux_sort = aux[taux_argsort]

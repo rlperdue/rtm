@@ -5,6 +5,7 @@ Russell Perdue
 
 from mpi4py import MPI
 import numpy as np
+import os
 import sys
 
 klist_npy = sys.argv[1]
@@ -28,9 +29,10 @@ while waiting > 0:
     for i in range(nworkers):
         if process[i] == -1 and nsolved < nsims:
             cmds = [f'LET count = {nsolved}', 
-                    f'LET nregions = {nregions}']
+                    f'LET nregions = {nregions}', 
+                    'DIM k(nregions)']
             for j in range(nregions):
-                cmds.append(f'SCALEPERM "R{j+1}", {klist[nsolved,j]}')
+                cmds.append(f'LET k({j+1}) = {klist[nsolved,j]}')
             cmds.append('CALL Fill')
             for cmd in cmds:
                 line = (cmd+'\n').encode()

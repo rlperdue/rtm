@@ -31,7 +31,8 @@ PROC Fill
         SOLVE
     LOOP
     SETGATE aux(naux), 0
-        
+    
+    SETNODALDATA "Gate", 13, 0.0
     PRINT 1 - SONUMBEREMPTY() / SONUMBERNODES()
     CALL Clear
 ENDPROC

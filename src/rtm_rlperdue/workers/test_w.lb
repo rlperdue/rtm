@@ -33,8 +33,8 @@ PROC Fill
     SETGATE aux(naux), 0
     
     SETNODALDATA "Gate", 13, 0.0
-    SETOUTTYPE "dmp"
-    WRITE "res/res" + STR(count) + ".dmp"
+    SETOUTTYPE "msh"
+    WRITE "res/res" + STR(count) + ".msh"
     CALL Clear
     PRINT 0
 ENDPROC

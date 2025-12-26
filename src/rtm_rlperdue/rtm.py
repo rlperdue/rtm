@@ -94,8 +94,9 @@ def dataset(test_: Path, kvalues: list[float], meshdata, config):
     
     # max simulation times
     maxtimes = np.zeros(nsims)
+    ventinds = np.array(vents) - 1
     for i in range(nsims):
-        maxtimes[i] = np.min(nodalfilltimes[vents,i])
+        maxtimes[i] = np.min(nodalfilltimes[ventinds,i])
     np.save(dataset_/'maxtimes.npy', maxtimes)
     
     # penultimate sensor arrival times
@@ -179,8 +180,8 @@ def location(dataset_: Path, naux: int, name: str, meshdata, config):
     pos = np.load(dataset_/'../mesh/mesh_flat.npy')
     nnodes = np.size(pos,0)
     
-    max_calls = 50
-    n_initial_points = 5
+    max_calls = 100
+    n_initial_points = round(max_calls/3)
     xdata = np.zeros((max_calls,naux*2))
     ydata = np.zeros(max_calls)
     auxdata = []
@@ -190,7 +191,7 @@ def location(dataset_: Path, naux: int, name: str, meshdata, config):
         [bounds for _ in range(2*naux)], 
         base_estimator=GaussianProcessRegressor(), 
         n_initial_points=n_initial_points, 
-        initial_point_generator='random', 
+        initial_point_generator='halton', 
         )
     
     i = 0
@@ -208,7 +209,7 @@ def location(dataset_: Path, naux: int, name: str, meshdata, config):
             auxgates = []
             illegal_gate = False
             for j in range(naux):
-                locsmtx = np.reshape(locs[2*j:2*j+1],(1,-1))
+                locsmtx = np.reshape(locs[2*j:2*j+2],(1,-1))
                 d = pos - np.ones((nnodes,1)) @ locsmtx
                 distances = np.linalg.norm(d, axis=1)
                 auxgate = np.argmin(distances) + 1
