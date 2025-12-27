@@ -8,4 +8,4 @@ miniforge
 C:\Users\rperd\miniforge3\Scripts\activate.bat
 
 environment
-C:\Users\rperd\miniforge3\envs\torch-env
+C:\Users\rperd\miniforge3\envs\rtm-env

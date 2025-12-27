@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: rtm_rlperdue
+Version: 0.1
+Summary: Optimization of auxiliary gate locations and activation times for manufacturing parts with RTM
+Author-email: Russell Perdue <rperdue@udel.edu>
+Requires-Python: >=3.9
+Description-Content-Type: text/plain
+
+Russell Perdue
+Created 2025/11/07
+Last updated 2025/12/26
