@@ -158,10 +158,10 @@ class CLI():
             self.menu1()
     
     def execute_remote(self, args):
-        os.chdir(self.rtm_)
         testfolder = args[0]
         task = args[1]
         zippath = Path('to_server.zip').resolve()
+        os.chdir(self.rtm_)
         with zipfile.ZipFile(zippath, 'w') as zipf:
             zipf.write(f'tests/{testfolder}/mesh')
             for file in os.listdir(f'tests/{testfolder}/mesh'):
@@ -171,6 +171,7 @@ class CLI():
                 zipf.write(f'tests/{testfolder}/{dataset}')
                 for file in os.listdir(f'tests/{testfolder}/{dataset}'):
                     zipf.write(f'tests/{testfolder}/{dataset}/{file}')
+        os.chdir(self.test_)
         subprocess.call(f'scp {zippath} server:/Users/rperd/Desktop/rtm')
 
         miniforge_ = self.config[2]
@@ -180,13 +181,12 @@ class CLI():
             'powershell -Command Expand-Archive to_server.zip -DestinationPath .', 
             'del to_server.zip', 
             'git pull', 
-            f'call {miniforge_}', 
-            f'call conda activate {env_}', 
-            f'call python main.py {' '.join(args)}'
+            f'{miniforge_}', 
+            f'conda activate {env_}', 
+            f'python main.py {' '.join(args)}'
         ])
         subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
         os.remove(zippath)
-        os.chdir(self.test_)
 
         return 0
 
