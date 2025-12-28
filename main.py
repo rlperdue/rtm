@@ -174,6 +174,12 @@ class CLI():
         os.chdir(self.test_)
         subprocess.call(f'scp {zippath} server:/Users/rperd/Desktop/rtm')
 
+        if task == 1:
+            kstr = args[2].replace(',','_').replace(' ','')
+            newfolder = f'dataset_{kstr}'
+        if task == 2 or task == 3:
+            newfolder = args[4]
+        
         miniforge_ = self.config[2]
         env_ = self.config[3]
         cmds = ' && '.join([
@@ -183,7 +189,8 @@ class CLI():
             'git pull', 
             f'{miniforge_}', 
             f'conda activate {env_}', 
-            f'python main.py {' '.join(args)}'
+            f'python main.py {' '.join(args)}', 
+            f'powershell -Command Compress-Archive tests/{testfolder}/{newfolder} -DestinationPath ./{newfolder}'
         ])
         subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
         os.remove(zippath)
