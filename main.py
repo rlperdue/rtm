@@ -14,12 +14,17 @@ from typing import Tuple
 class CLI():
     def __init__(self):
         print('Welcome!')
-        self.rtm_ = Path(r'C:\Users\rperd\OneDrive\Documents\GitHub\rtm')
+        self.rtm_ = Path.cwd()
         self.config = self.get_config(self.rtm_)
         
         self.menu0()
     
     def menu0(self):
+        '''
+        print('Run local (0) or remote (1)?')
+        self.remote = int(input('>>> '))
+        print('OK')'''
+
         print('Select test folder:')
         
         root = tk.Tk()
