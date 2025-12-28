@@ -158,6 +158,7 @@ class CLI():
             self.menu1()
     
     def execute_remote(self, args):
+        os.chdir(self.rtm_)
         testfolder = args[0]
         task = args[1]
         zippath = Path('to_server.zip').resolve()
@@ -172,8 +173,8 @@ class CLI():
                     zipf.write(f'tests/{testfolder}/{dataset}/{file}')
         subprocess.call(f'scp {zippath} server:/Users/rperd/Desktop/rtm')
 
-        miniforge_ = self.get_config[2]
-        env_ = self.get_config[3]
+        miniforge_ = self.config[2]
+        env_ = self.config[3]
         cmds = ' && '.join([
             'cd Desktop/rtm', 
             'powershell -Command Expand-Archive to_server.zip -DestinationPath .', 
@@ -184,9 +185,8 @@ class CLI():
             f'call python main.py {' '.join(args)}'
         ])
         subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
-
         os.remove(zippath)
-
+        os.chdir(self.test_)
 
     def get_meshdata(self):
         with open('mesh/mesh.msh', 'r') as file:
