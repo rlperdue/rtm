@@ -197,6 +197,13 @@ class CLI():
 
         subprocess.call(f'scp server:/Users/rperd/Desktop/rtm/{newfolder}.zip {self.test_}')
 
+        cmds = ' && '.join([
+            'cd Desktop/rtm', 
+            'rmdir /s /q tests', 
+            f'del {newfolder}.zip'
+        ])
+        subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
+
         return 0
 
     def get_meshdata(self):
