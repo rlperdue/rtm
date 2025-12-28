@@ -29,6 +29,8 @@ class CLI():
         print('Run local (0) or remote (1)?')
         if not self.command_line_mode:
             self.remote = int(input('>>> '))
+        else:
+            self.remote = 0
         print('OK')
 
         if self.command_line_mode:
@@ -80,7 +82,11 @@ class CLI():
             kvalues = [float(val) for val in kvalues_raw.split(',')]
             print('Creating dataset...')
             if self.remote:
-                self.execute_remote()
+                args = [str(self.test_.relative_to(self.rtm_/'tests')), 
+                        '1', 
+                        kvalues_raw
+                ]
+                self.execute_remote(args)
             else:
                 state = rtm.dataset(self.test_, kvalues, self.meshdata, 
                                     self.config)
@@ -89,8 +95,8 @@ class CLI():
         elif choice == 2:
             if self.command_line_mode:
                 dataset_ = Path(self.test_/sys.argv[3])
-                auxgates = sys.argv[2]
-                name = sys.argv[3]
+                auxgates = sys.argv[4]
+                name = sys.argv[5]
             else:
                 print('Select dataset:')
                 root = tk.Tk()
@@ -103,7 +109,13 @@ class CLI():
                 name = input('>>> ')
             print('Optimizing control action times...')
             if self.remote:
-                self.execute_remote()
+                args = [str(self.test_.relative_to(self.rtm_/'tests')), 
+                        '2', 
+                        str(dataset_), 
+                        auxgates, 
+                        name
+                ]
+                self.execute_remote(args)
             else:
                 state = rtm.control(dataset_, auxgates, name, self.meshdata, 
                                     self.config)
@@ -112,7 +124,7 @@ class CLI():
         elif choice == 3:
             if self.command_line_mode:
                 dataset_ = Path(self.test_/sys.argv[3])
-                naux = sys.argv[4]
+                naux = int(sys.argv[4])
                 name = sys.argv[5]
             else:
                 print('Select dataset:')
@@ -126,7 +138,13 @@ class CLI():
                 name = input('>>> ')
             print('Optimizing aux. gate locations...')
             if self.remote:
-                self.execute_remote()
+                args = [str(self.test_.relative_to(self.rtm_/'tests')), 
+                        '3', 
+                        str(dataset_), 
+                        str(naux), 
+                        name,
+                ]
+                self.execute_remote(args)
             else:
                 state = rtm.location(dataset_, naux, name, self.meshdata, 
                                     self.config)
@@ -139,16 +157,16 @@ class CLI():
         if not self.command_line_mode:
             self.menu1()
     
-    def execute_remote(self):
-        testfolder = sys.args[0]
-        task = sys.args[1]
+    def execute_remote(self, args):
+        testfolder = args[0]
+        task = args[1]
         zippath = Path('to_server.zip').resolve()
         with zipfile.ZipFile(zippath, 'w') as zipf:
             zipf.write(f'tests/{testfolder}/mesh')
             for file in os.listdir(f'tests/{testfolder}/mesh'):
                 zipf.write(f'tests/{testfolder}/mesh/{file}')
             if task == 2 or task == 3:
-                dataset = sys.args[2]
+                dataset = args[2]
                 zipf.write(f'tests/{testfolder}/{dataset}')
                 for file in os.listdir(f'tests/{testfolder}/{dataset}'):
                     zipf.write(f'tests/{testfolder}/{dataset}/{file}')
@@ -163,7 +181,7 @@ class CLI():
             'git pull', 
             f'call {miniforge_}', 
             f'call conda activate {env_}', 
-            f'call python main.py {' '.join(sys.argv[1:])}'
+            f'call python main.py {' '.join(args)}'
         ])
         subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
 
