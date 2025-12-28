@@ -159,7 +159,7 @@ class CLI():
     
     def execute_remote(self, args):
         testfolder = args[0]
-        task = args[1]
+        task = int(args[1])
         zippath = Path('to_server.zip').resolve()
         os.chdir(self.rtm_)
         with zipfile.ZipFile(zippath, 'w') as zipf:
@@ -194,6 +194,8 @@ class CLI():
         ])
         subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
         os.remove(zippath)
+
+        subprocess.call(f'scp server:/Users/rperd/Desktop/rtm/{newfolder}.zip {self.test_}')
 
         return 0
 
