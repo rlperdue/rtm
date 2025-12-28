@@ -6,34 +6,43 @@ Russell Perdue
 import os
 from pathlib import Path
 from rtm_rlperdue import rtm
+import subprocess
 import sys
 import tkinter as tk
 from tkinter.filedialog import askdirectory
 from typing import Tuple
+import zipfile
 
 class CLI():
     def __init__(self):
         print('Welcome!')
         self.rtm_ = Path.cwd()
         self.config = self.get_config(self.rtm_)
+
+        self.command_line_mode = False
+        if len(sys.argv[1:]) > 0:
+            self.command_line_mode = True
         
         self.menu0()
-    
+            
     def menu0(self):
-        '''
         print('Run local (0) or remote (1)?')
-        self.remote = int(input('>>> '))
-        print('OK')'''
+        if not self.command_line_mode:
+            self.remote = int(input('>>> '))
+        print('OK')
 
-        print('Select test folder:')
-        
-        root = tk.Tk()
-        root.withdraw()
-        root.wm_attributes('-topmost', 1)
-        initialdir = self.rtm_ / 'tests'
-        self.test_ = Path(askdirectory(initialdir=initialdir)).resolve()
-        os.chdir(self.test_)
-        print('Done')
+        if self.command_line_mode:
+            self.test_ = Path(self.rtm_/'tests'/sys.argv[1]).resolve()
+            os.chdir(self.test_)
+        else:
+            print('Select test folder:')
+            root = tk.Tk()
+            root.withdraw()
+            root.wm_attributes('-topmost', 1)
+            initialdir = self.rtm_ / 'tests'
+            self.test_ = Path(askdirectory(initialdir=initialdir)).resolve()
+            os.chdir(self.test_)
+            print('Done')
         
         if not os.path.exists('mesh'):
             sys.exit('"mesh/" not found')
@@ -52,7 +61,10 @@ class CLI():
         print('2   Optimize control action times')
         print('3   Optimize aux. gate locations')
         print('4   Quit')
-        choice = int(input('>>> '))
+        if self.command_line_mode:
+            choice = int(sys.argv[2])
+        else:
+            choice = int(input('>>> '))
         
         if choice == 0:
             print('Flattening mesh...')
@@ -60,8 +72,11 @@ class CLI():
             if state == 0:
                 print('Done')
         elif choice == 1:
-            print('List racetracking strengths separated by commas:')
-            kvalues_raw = input('>>> ')
+            if self.command_line_mode:
+                kvalues_raw = sys.argv[3]
+            else:
+                print('List racetracking strengths separated by commas:')
+                kvalues_raw = input('>>> ')
             kvalues = [float(val) for val in kvalues_raw.split(',')]
             print('Creating dataset...')
             state = rtm.dataset(self.test_, kvalues, self.meshdata, 
@@ -69,30 +84,40 @@ class CLI():
             if state == 0:
                 print('Done')
         elif choice == 2:
-            print('Select dataset:')
-            root = tk.Tk()
-            root.withdraw()
-            root.wm_attributes('-topmost', 1)
-            dataset_ = Path(tk.filedialog.askdirectory(initialdir=self.test_))
-            print('List aux. gate nodes separated by commas:')
-            auxgates = input('>>> ')
-            print('Enter folder name:')
-            name = input('>>> ')
+            if self.command_line_mode:
+                dataset_ = Path(self.test_/sys.argv[3])
+                auxgates = sys.argv[2]
+                name = sys.argv[3]
+            else:
+                print('Select dataset:')
+                root = tk.Tk()
+                root.withdraw()
+                root.wm_attributes('-topmost', 1)
+                dataset_ = Path(tk.filedialog.askdirectory(initialdir=self.test_))
+                print('List aux. gate nodes separated by commas:')
+                auxgates = input('>>> ')
+                print('Enter folder name:')
+                name = input('>>> ')
             print('Optimizing control action times...')
             state = rtm.control(dataset_, auxgates, name, self.meshdata, 
                                 self.config)
             if state == 0:
                 print('Done')
         elif choice == 3:
-            print('Select dataset:')
-            root = tk.Tk()
-            root.withdraw()
-            root.wm_attributes('-topmost', 1)
-            dataset_ = Path(tk.filedialog.askdirectory(initialdir=self.test_))
-            print('Enter number of aux. gates:')
-            naux = int(input('>>> '))
-            print('Enter folder name:')
-            name = input('>>> ')
+            if self.command_line_mode:
+                dataset_ = Path(self.test_/sys.argv[3])
+                naux = sys.argv[4]
+                name = sys.argv[5]
+            else:
+                print('Select dataset:')
+                root = tk.Tk()
+                root.withdraw()
+                root.wm_attributes('-topmost', 1)
+                dataset_ = Path(tk.filedialog.askdirectory(initialdir=self.test_))
+                print('Enter number of aux. gates:')
+                naux = int(input('>>> '))
+                print('Enter folder name:')
+                name = input('>>> ')
             print('Optimizing aux. gate locations...')
             state = rtm.location(dataset_, naux, name, self.meshdata, 
                                  self.config)
@@ -102,8 +127,40 @@ class CLI():
             print('Goodbye!')
             sys.exit()
         
-        self.menu1()
+        if not self.command_line_mode:
+            self.menu1()
     
+    def execute_remote(self, args):
+        testfolder = args[0]
+        task = args[1]
+        zippath = Path('to_server.zip').resolve()
+        with zipfile.ZipFile(zippath, 'w') as zipf:
+            zipf.write(f'tests/{testfolder}/mesh')
+            for file in os.listdir(f'tests/{testfolder}/mesh'):
+                zipf.write(f'tests/{testfolder}/mesh/{file}')
+            if task == 2 or task == 3:
+                dataset = args[2]
+                zipf.write(f'tests/{testfolder}/{dataset}')
+                for file in os.listdir(f'tests/{testfolder}/{dataset}'):
+                    zipf.write(f'tests/{testfolder}/{dataset}/{file}')
+        subprocess.call(f'scp {zippath} server:/Users/rperd/Desktop/rtm')
+
+        miniforge_ = self.get_config[2]
+        env_ = self.get_config[3]
+        cmds = ' && '.join([
+            'cd Desktop/rtm', 
+            'powershell -Command Expand-Archive to_server.zip -DestinationPath .', 
+            'del to_server.zip', 
+            'git pull', 
+            f'call {miniforge_}', 
+            f'call conda activate {env_}', 
+            f'call python main.py {' '.join(sys.argv[1:])}'
+        ])
+        subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
+
+        os.remove(zippath)
+
+
     def get_meshdata(self):
         with open('mesh/mesh.msh', 'r') as file:
             # nodes
