@@ -79,8 +79,11 @@ class CLI():
                 kvalues_raw = input('>>> ')
             kvalues = [float(val) for val in kvalues_raw.split(',')]
             print('Creating dataset...')
-            state = rtm.dataset(self.test_, kvalues, self.meshdata, 
-                                self.config)
+            if self.remote:
+                self.execute_remote()
+            else:
+                state = rtm.dataset(self.test_, kvalues, self.meshdata, 
+                                    self.config)
             if state == 0:
                 print('Done')
         elif choice == 2:
@@ -99,8 +102,11 @@ class CLI():
                 print('Enter folder name:')
                 name = input('>>> ')
             print('Optimizing control action times...')
-            state = rtm.control(dataset_, auxgates, name, self.meshdata, 
-                                self.config)
+            if self.remote:
+                self.execute_remote()
+            else:
+                state = rtm.control(dataset_, auxgates, name, self.meshdata, 
+                                    self.config)
             if state == 0:
                 print('Done')
         elif choice == 3:
@@ -119,8 +125,11 @@ class CLI():
                 print('Enter folder name:')
                 name = input('>>> ')
             print('Optimizing aux. gate locations...')
-            state = rtm.location(dataset_, naux, name, self.meshdata, 
-                                 self.config)
+            if self.remote:
+                self.execute_remote()
+            else:
+                state = rtm.location(dataset_, naux, name, self.meshdata, 
+                                    self.config)
             if state == 0:
                 print('Done')
         elif choice == 4:
@@ -130,16 +139,16 @@ class CLI():
         if not self.command_line_mode:
             self.menu1()
     
-    def execute_remote(self, args):
-        testfolder = args[0]
-        task = args[1]
+    def execute_remote(self):
+        testfolder = sys.args[0]
+        task = sys.args[1]
         zippath = Path('to_server.zip').resolve()
         with zipfile.ZipFile(zippath, 'w') as zipf:
             zipf.write(f'tests/{testfolder}/mesh')
             for file in os.listdir(f'tests/{testfolder}/mesh'):
                 zipf.write(f'tests/{testfolder}/mesh/{file}')
             if task == 2 or task == 3:
-                dataset = args[2]
+                dataset = sys.args[2]
                 zipf.write(f'tests/{testfolder}/{dataset}')
                 for file in os.listdir(f'tests/{testfolder}/{dataset}'):
                     zipf.write(f'tests/{testfolder}/{dataset}/{file}')
