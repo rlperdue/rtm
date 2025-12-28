@@ -86,7 +86,7 @@ class CLI():
                         '1', 
                         kvalues_raw
                 ]
-                self.execute_remote(args)
+                state = self.execute_remote(args)
             else:
                 state = rtm.dataset(self.test_, kvalues, self.meshdata, 
                                     self.config)
@@ -115,7 +115,7 @@ class CLI():
                         auxgates, 
                         name
                 ]
-                self.execute_remote(args)
+                state = self.execute_remote(args)
             else:
                 state = rtm.control(dataset_, auxgates, name, self.meshdata, 
                                     self.config)
@@ -144,7 +144,7 @@ class CLI():
                         str(naux), 
                         name,
                 ]
-                self.execute_remote(args)
+                state = self.execute_remote(args)
             else:
                 state = rtm.location(dataset_, naux, name, self.meshdata, 
                                     self.config)
@@ -187,6 +187,8 @@ class CLI():
         subprocess.run(f'ssh -o BatchMode=yes server {cmds}')
         os.remove(zippath)
         os.chdir(self.test_)
+
+        return 0
 
     def get_meshdata(self):
         with open('mesh/mesh.msh', 'r') as file:
