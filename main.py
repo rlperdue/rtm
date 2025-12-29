@@ -82,7 +82,7 @@ class CLI():
             kvalues = [float(val) for val in kvalues_raw.split(',')]
             print('Creating dataset...')
             if self.remote:
-                args = [str(self.test_.relative_to(self.rtm_/'tests')), 
+                args = [self.test_.name, 
                         '1', 
                         kvalues_raw
                 ]
@@ -109,9 +109,9 @@ class CLI():
                 name = input('>>> ')
             print('Optimizing control action times...')
             if self.remote:
-                args = [str(self.test_.relative_to(self.rtm_/'tests')), 
+                args = [self.test_.name, 
                         '2', 
-                        str(dataset_), 
+                        dataset_.name, 
                         auxgates, 
                         name
                 ]
@@ -138,9 +138,9 @@ class CLI():
                 name = input('>>> ')
             print('Optimizing aux. gate locations...')
             if self.remote:
-                args = [str(self.test_.relative_to(self.rtm_/'tests')), 
+                args = [self.test_.name, 
                         '3', 
-                        str(dataset_), 
+                        dataset_.name, 
                         str(naux), 
                         name,
                 ]
